@@ -31,13 +31,11 @@ void							set_solution(int n, int *solution, int *qn, int x)
 
 int								check_if_equal(int *n, std::vector<t_node*> list, int x)
 {
-	std::cout << "listsize|" << list.size() << std::endl;
 	for (size_t i = 0; i < list.size(); i++)
 	{
 		int		j = 0;
 		while (n[j] == list[i]->n[j] && j < x)
 			j++;
-		std::cout << "j|" << j << std::endl;
 		if (j == x)
 			return (1);
 	}
@@ -79,16 +77,19 @@ void							find_path(int x, int *t)
 	open.push_back(first);
 	while (open.size())
 	{
-		std::cout << "check|" << std::endl;
-		std::vector<t_node*>::iterator	current_smallest_f = open.begin();
-		std::vector<t_node*>::iterator	it = open.begin();
+		std::vector<t_node*>::iterator	current_smallest_f;
+		std::vector<t_node*>::iterator	it;
+		current_smallest_f = it = open.begin();
 		it++;
 		while (it != open.end())
+		{
 			if ((*it)->f < (*current_smallest_f)->f)
 				current_smallest_f = it;
+			it++;
+		}
 		q = *current_smallest_f;
 		open.erase(current_smallest_f);
-		closed.push_back(duplicate(*q, x * x));
+		closed.push_back(q);
 		s = 4;
 		i = 0;
 		while (q->n[i])
@@ -113,7 +114,6 @@ void							find_path(int x, int *t)
 			s--;
 			j[3] = 0;
 		}
-		std::cout << "check2|" << std::endl;
 		while (s)
 		{
 			t_node	*successor;
@@ -168,16 +168,14 @@ void							find_path(int x, int *t)
 							std::cout << asdf[x * y + z] << " ";
 						std::cout << std::endl;
 					}
+					std::cout << std::endl;
 					tmp.pop();
 				}
 				std::cout << std::endl << "Total moves: " << successor->g << std::endl;
 				return ;
 			}
-			for (int z = 0; z < x*x; z++)
-					std::cout << successor->n[z] << std::endl;
 			if (check_if_equal(successor->n, open, x * x))
 			{
-				std::cout << "wubwub" << std::endl;
 				delete [] successor->n;
 				delete successor;
 				s--;
@@ -185,7 +183,6 @@ void							find_path(int x, int *t)
 			}
 			if (check_if_equal(successor->n, closed, x * x))
 			{
-				std::cout << "wubwub2" << std::endl;
 				delete [] successor->n;
 				delete successor;
 				s--;
@@ -196,7 +193,6 @@ void							find_path(int x, int *t)
 			delete successor;
 			s--;
 		}
-		delete q;
 	}
 	std::cout << "No solution found" << std::endl;
 	open.clear();
