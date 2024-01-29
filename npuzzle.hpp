@@ -12,3 +12,9 @@ typedef struct	s_node {
 	int				f;
 	struct s_node	*parent;
 }				t_node;
+
+typedef struct	s_heuristic
+{
+	std::string		name;
+	int				(*c)(t_node a, int *solution, int x);
+}				t_heuristic;
