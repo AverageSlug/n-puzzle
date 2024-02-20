@@ -21,9 +21,9 @@ int								one_way_distance(t_node a, int *solution, int x)
 							if (a.n[i + m] == solution[k] && a.n[i + m] && ((m > 0 && i / x == k / x && k <= j && k > i) || (m < 0 && i / x == k / x && k >= j && k < i)))
 								f[a.n[i]]++;
 						if (m > 0)
-							m--;
+							--m;
 						else
-							m++;
+							++m;
 					}
 				}
 				else if (i % x == j % x)
@@ -62,7 +62,7 @@ int								hamming_distance(t_node a, int *solution, int x)
 	int f = 0;
 	for (int i = 0; i < x * x; i++)
 		if (a.n[i] != solution[i] && a.n[i])
-			f++;
+			++f;
 	return (f);
 }
 
@@ -82,35 +82,35 @@ void							set_solution(int n, int *solution, int *qn, int x)
 			{
 				for (int i = 0; i < y; i++)
 				{
-					c++;
+					++c;
 					solution[c] = t;
-					t++;
+					++t;
 				}
-				y--;
+				--y;
 			}
 			else if (v % 4 == 2)
 			{
 				for (int i = y; i; i--)
 				{
-					c--;
+					--c;
 					solution[c] = t;
-					t++;
+					++t;
 				}
-				y--;
+				--y;
 			}
 			else if (v % 4 == 1)
 				for (int i = 0; i < y; i++)
 				{
 					c += x;
 					solution[c] = t;
-					t++;
+					++t;
 				}
 			else
 				for (int i = y; i; i--)
 				{
 					c -= x;
 					solution[c] = t;
-					t++;
+					++t;
 				}
 		}
 	}
@@ -122,7 +122,7 @@ int								check_if_equal(int *n, std::vector<t_node*> list, int x)
 	{
 		int		j = 0;
 		while (j < x && n[j] == list[i]->n[j])
-			j++;
+			++j;
 		if (j == x)
 			return (1);
 	}
@@ -149,7 +149,7 @@ void							find_path(int x, int *t, std::string heuristic)
 	std::vector<t_node*>	closed;
 	t_node					*q;
 	int						s, h, i, j[4];
-	size_t					c_in_time = 0, c_in_size = 0;
+	size_t					c_in_size = 0;
 
 	t_heuristic				to_use[3];
 	to_use[0].name = "manhattan";
@@ -166,18 +166,17 @@ void							find_path(int x, int *t, std::string heuristic)
 	int		*solution = new int[x * x];
 	set_solution(0, solution, NULL, x);
 
-	int qwer;
-	for (qwer = 0; qwer < x * x; qwer++)
-		if (t[qwer] != solution[qwer])
+	for (i = 0; i < x * x; i++)
+		if (t[i] != solution[i])
 			break ;
-	if (qwer == x * x)
+	if (i == x * x)
 	{
 		delete [] solution;
 		std::cout << "Final solution: " << std::endl;
-		for (int asdf = 0; asdf < x; asdf++)
+		for (s = 0; s < x; s++)
 		{
-			for (int zxcv = 0; zxcv < x; zxcv++)
-				std::cout << t[asdf * x + zxcv] << " ";
+			for (i = 0; i < x; i++)
+				std::cout << t[s * x + i] << " ";
 			std::cout << std::endl;
 		}
 		std::cout << std::endl << "Total moves: 0" << std::endl;
@@ -204,52 +203,52 @@ void							find_path(int x, int *t, std::string heuristic)
 		std::vector<t_node*>::iterator	current_smallest_f;
 		std::vector<t_node*>::iterator	it;
 		current_smallest_f = it = open.begin();
-		it++;
+		++it;
 		while (it != open.end())
 		{
 			if ((*it)->f < (*current_smallest_f)->f)
 				current_smallest_f = it;
-			it++;
+			++it;
 		}
 		q = *current_smallest_f;
+		// for (int ttt = 0; ttt < x * x; ttt++)
+		// 	std::cout << q->n[ttt] << " ";
+		// std::cout << std::endl;
 		open.erase(current_smallest_f);
-		c_in_time++;
 		closed.push_back(q);
 		s = 4;
 		i = 0;
 		while (q->n[i])
-			i++;
+			++i;
 		if (!(i / x))
 		{
-			s--;
+			--s;
 			j[0] = 0;
 		}
 		if (!(i % x))
 		{
-			s--;
+			--s;
 			j[1] = 0;
 		}
 		if (i / x == x - 1)
 		{
-			s--;
+			--s;
 			j[2] = 0;
 		}
 		if (i % x == x - 1)
 		{
-			s--;
+			--s;
 			j[3] = 0;
 		}
 		while (s)
 		{
 			t_node	*successor;
 			successor = new t_node;
-			successor->parent = q;
-			successor->g = q->g + 1;
 			successor->n = new int[x * x];
 			set_solution(-1, successor->n, q->n, x);
 			int		k = 0;
 			while (!j[k])
-				k++;
+				++k;
 			j[k] = 0;
 			if (!k)
 			{
@@ -271,6 +270,15 @@ void							find_path(int x, int *t, std::string heuristic)
 				successor->n[i] = successor->n[i + 1];
 				successor->n[i + 1] = 0;
 			}
+			if (check_if_equal(successor->n, open, x * x) || check_if_equal(successor->n, closed, x * x))
+			{
+				delete [] successor->n;
+				delete successor;
+				--s;
+				continue ;
+			}
+			successor->parent = q;
+			successor->g = q->g + 1;
 			successor->h = (*to_use[h].c)(*successor, solution, x);
 			successor->f = successor->g + successor->h;
 			if (c_in_size < open.size() + closed.size() + 1)
@@ -290,10 +298,10 @@ void							find_path(int x, int *t, std::string heuristic)
 				while (tmp.size())
 				{
 					solutionfinale = tmp.top();
-					for (int y = 0; y < x; y++)
+					for (i = 0; i < x; i++)
 					{
-						for (int z = 0; z < x; z++)
-							std::cout << solutionfinale[x * y + z] << " ";
+						for (s = 0; s < x; s++)
+							std::cout << solutionfinale[x * i + s] << " ";
 						std::cout << std::endl;
 					}
 					std::cout << std::endl;
@@ -301,24 +309,17 @@ void							find_path(int x, int *t, std::string heuristic)
 					tmp.pop();
 				}
 				std::cout << std::endl << "Total moves: " << successor->g << std::endl;
-				std::cout << "Complexity in time: " << c_in_time << std::endl;
+				std::cout << "Complexity in time: " << closed.size() << std::endl;
 				std::cout << "Complexity in size: " << c_in_size << std::endl;
 				open.clear();
 				closed.clear();
 				delete [] solution;
 				return ;
 			}
-			if (check_if_equal(successor->n, open, x * x) || check_if_equal(successor->n, closed, x * x))
-			{
-				delete [] successor->n;
-				delete successor;
-				s--;
-				continue ;
-			}
 			open.push_back(duplicate(*successor, x * x));
 			delete [] successor->n;
 			delete successor;
-			s--;
+			--s;
 		}
 	}
 	std::cout << "No solution found" << std::endl;
@@ -365,7 +366,7 @@ int								main(int argc, char **argv)
 						str.erase(0);
 					pos = str.find(" ", pos);
 					x = atoi(str.substr(0, pos).c_str());
-					if (x < 3)
+					if (x < 1)
 					{
 						file.close();
 						std::cout << "Invalid input file" << std::endl;
@@ -395,7 +396,7 @@ int								main(int argc, char **argv)
 						pos = str.find(' ', pos);
 						t[i] = atoi(str.substr(0, pos).c_str());
 						str.erase(0, pos);
-						i++;
+						++i;
 					}
 				}
 			}
