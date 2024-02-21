@@ -4,12 +4,14 @@
 #include <fstream>
 #include <iomanip>
 #include <stack>
+#include <random>
 
 typedef struct	s_node {
 	int				*n;
 	int				g;
 	int				h;
 	int				f;
+	int				dir;
 	struct s_node	*parent;
 }				t_node;
 

@@ -14,7 +14,7 @@ $(NAME)	:	$(OBJS)
 			$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME)
 
 clean	:
-			rm -f $(OBJS)
+			rm -f $(OBJS) tmp_npuzzle_*
 
 fclean	:	clean
 			rm -f $(NAME)
