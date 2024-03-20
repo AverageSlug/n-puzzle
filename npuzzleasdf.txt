@@ -1,5 +1,8 @@
 # This puzzle is solvable
 3
-2 1 0
-5 4 7
-8 6 3
+1 2 3
+8 0 4
+7 6 
+
+//4x4 is too slow, 5x5 and above impossible. optimize alot somehow. idk
+//last heuristic (Hamming is abysmal)

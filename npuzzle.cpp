@@ -75,7 +75,6 @@ void							set_solution(int n, int *solution, int *qn, int x)
 		for (int i = 0; i < x * x; i++)
 			solution[i] = qn[i];
 	else
-	{
 		for (int v = 0; v < x * 2 - 1; v++)
 		{
 			if (t == x * x)
@@ -115,7 +114,6 @@ void							set_solution(int n, int *solution, int *qn, int x)
 					++t;
 				}
 		}
-	}
 }
 
 int								check_if_solvable(int *t, int *solution, int x)
@@ -123,37 +121,36 @@ int								check_if_solvable(int *t, int *solution, int x)
 	int		*tmp = new int[x * x];
 	for (int i = 0; i < x * x; i++)
 		tmp[i] = t[i];
-	int		k = 0;
+	int		k = 0, l = 0;
 	while (tmp[k])
-		k++;
-	k += (k + x) % 2;
+		++k;
+	while (solution[l])
+		++l;
+	k = abs((k / x) - (l / x)) + abs((k % x) - (l % x));
 	for (int j = 0; j < x * x; j++)
 		for (int i = 0; i < x * x; i++)
-		{
 			if (tmp[i] == solution[j])
 			{
 				if (i != j)
 				{
 					tmp[i] = tmp[j];
 					tmp[j] = solution[j];
-					k++;
+					++k;
 				}
 				break ;
 			}
-		}
 	delete [] tmp;
 	return (k);
 }
 
-int								check_if_equal(t_node *successor, std::vector<t_node*> list, int *solution, int x)
+int								check_if_equal(t_node *successor, std::vector<t_node*> list, int x)
 {
 	for (size_t i = 0; i < list.size(); i++)
 	{
 		int		j = 0;
 		while (j < x * x && successor->n[j] == list[i]->n[j])
 			++j;
-		if (j == x * x || (check_if_solvable(successor->n, solution, x) == check_if_solvable(list[i]->n, solution, x)
-			&& successor->g == list[i]->g && successor->h == list[i]->h && successor->dir != list[i]->dir))
+		if (j == x * x)
 			return (1);
 	}
 	return (0);
@@ -197,7 +194,7 @@ void							find_path(int x, int *t, std::string heuristic)
 	int		*solution = new int[x * x];
 	set_solution(0, solution, NULL, x);
 
-	if (check_if_solvable(t, solution, x) % 2)
+	if (!(check_if_solvable(t, solution, x) % 2))
 	{
 		for (i = 0; i < x * x; i++)
 			if (t[i] != solution[i])
@@ -237,11 +234,10 @@ void							find_path(int x, int *t, std::string heuristic)
 			std::vector<t_node*>::iterator	current_smallest_f;
 			std::vector<t_node*>::iterator	it;
 			current_smallest_f = it = open.begin();
-			++it;
 			while (it != open.end())
 			{
 				if (((*it)->f < (*current_smallest_f)->f) || ((*it)->f == (*current_smallest_f)->f
-					&& (*it)->g >= (*current_smallest_f)->g))
+					&& (*it)->g > (*current_smallest_f)->g))
 					current_smallest_f = it;
 				++it;
 			}
@@ -278,10 +274,6 @@ void							find_path(int x, int *t, std::string heuristic)
 				successor = new t_node;
 				successor->n = new int[x * x];
 				set_solution(-1, successor->n, q->n, x);
-				successor->parent = q;
-				successor->g = q->g + 1;
-				successor->h = (*to_use[h].c)(*successor, solution, x);
-				successor->f = successor->g + successor->h;
 				int		k = 0;
 				while (!j[k])
 					++k;
@@ -310,7 +302,11 @@ void							find_path(int x, int *t, std::string heuristic)
 					successor->n[i + 1] = 0;
 					successor->dir = 4;
 				}
-				if (check_if_equal(successor, open, solution, x) || check_if_equal(successor, closed, solution, x))
+				successor->parent = q;
+				successor->g = q->g + 1;
+				successor->h = (*to_use[h].c)(*successor, solution, x);
+				successor->f = successor->g + successor->h;
+				if (check_if_equal(successor, open, x) || check_if_equal(successor, closed, x))
 				{
 					delete [] successor->n;
 					delete successor;
@@ -359,7 +355,7 @@ void							find_path(int x, int *t, std::string heuristic)
 			}
 		}
 	}
-	std::cout << "No solution found" << std::endl;
+	std::cout << "No solution" << std::endl;
 	open.clear();
 	closed.clear();
 	delete [] solution;
@@ -374,7 +370,7 @@ int								main(int argc, char **argv)
 
 	if (argc > 1)
 	{
-		if (!argv[1])
+		if (!argv[1] || !argv[2])
 		{
 			std::cout << "Invalid arguments" << std::endl;
 			return (1);
@@ -387,18 +383,32 @@ int								main(int argc, char **argv)
 		}
 		if (!argv[2])
 		{
-			srand(time(NULL));
-			str = "tmp_npuzzle_" + std::to_string(rand());
-			str2 = "python npuzzle-gen.py 3 > " + str;
-			system(str2.c_str());
-			file.open(str, std::ios::in);
+			
 		}
-		else
-			file.open(argv[2], std::ios::in);
+		file.open(argv[2], std::ios::in);
 		if (!file)
 		{
-			std::cout << "Error opening file" << std::endl;
-			return (1);
+			if (atoi(argv[2]))
+			{
+				if (atoi(argv[2]) > 2)
+				{
+					srand(time(NULL));
+					str = "tmp_npuzzle_" + std::to_string(rand());
+					str2 = "python npuzzle-gen.py " + std::to_string(atoi(argv[2])) + " > " + str;
+					system(str2.c_str());
+					file.open(str, std::ios::in);
+				}
+				else
+				{
+					std::cout << "Minimum size is 3" << std::endl;
+					return (1);
+				}
+			}
+			else
+			{
+				std::cout << "Error opening file" << std::endl;
+				return (1);
+			}
 		}
 		getline(file, str);
 		while (file)
@@ -412,7 +422,7 @@ int								main(int argc, char **argv)
 						str.erase(0);
 					pos = str.find(" ", pos);
 					x = atoi(str.substr(0, pos).c_str());
-					if (x < 1)
+					if (x < 3)
 					{
 						file.close();
 						std::cout << "Invalid input file" << std::endl;
